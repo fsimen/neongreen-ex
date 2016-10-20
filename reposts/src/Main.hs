@@ -53,6 +53,10 @@ main = do
    prob10 <- computeProbability numberOfSimulations 1000000 10
    prob100 <- computeProbability numberOfSimulations 1000000 100
    prob1000 <- computeProbability numberOfSimulations 1000000 1000
-   putStrLn $ "Probability for 10 more post " ++ (show prob10)
-   putStrLn $ "Probability for 100 more post " ++ (show prob100)
-   putStrLn $ "Probability for 1000 more post " ++ (show prob1000)
+   putStrLn $ "Probability from " ++
+     (show numberOfSimulations) ++ " simulations for the last 10 reposts of 1000010 reposts is " ++ (show prob10) 
+   putStrLn $ "Probability from " ++
+     (show numberOfSimulations) ++ " simulations for the last 100 reposts of 1000100 reposts is " ++ (show prob100)
+   putStrLn $ "Probability from " ++
+     (show numberOfSimulations) ++ " simulations for the last 1000 reposts of 1001000 reposts is " ++ (show prob1000)
+
