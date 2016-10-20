@@ -14,8 +14,7 @@ import System.Random
 
 type Winners = [Int]
 type Simulations = Int
-type Repost = Int
-type Reposts = [Repost]
+type Reposts = Int
 type Prizes = Int
 
 
@@ -25,23 +24,35 @@ numberOfSimulations = 10000
 numberOfPrizes :: Int
 numberOfPrizes = 7
 
-simulateNtimes :: Simulations -> Reposts -> Prizes -> Winners
-simulateNtimes sim rep pri =
+simulateNtimes :: Simulations -> Reposts -> Prizes -> IO Winners
+simulateNtimes n rep prizesNumber =
+  concat <$> (sequence $ replicate n sim)
+  where 
+    sim = getNRandomNumbersInRange prizesNumber (1,rep)
 
-  where
-    sim_result = randomRs (1,rep)
-    getWinnersIndices = take pri sim_result
-    getWinners = fmap (rep!!) getWinnersIndices
+getNRandomNumbersInRange :: Int -> (Int, Int) -> IO [Int]
+getNRandomNumbersInRange n (start,stop) =
+  sequence $ replicate n (randomRIO (start,stop))
 
-computeProbability :: Simulations -> Reposts -> Repost -> Double
-computeProbability sim reps rep =
-  (fromInteger (toInteger occurences))/(fromInteger (toInteger sim))
-  where
-    occurences = length $ filter (rep==) sim_results
-    sim_results = simulateNtimes sim reps numberOfPrizes
-  
+
+computeProbability :: Simulations -> Reposts -> Reposts -> IO Double
+computeProbability n reps extrarep = do
+  winners <- simulateNtimes n (reps+extrarep) numberOfPrizes
+  let
+    extrarepList :: [Int]
+    extrarepList = if extrarep == 0 then [] else [reps..(reps+extrarep)]
+    occurences :: Int
+    occurences =  foldr (\a acc ->
+                          if (elem a extrarepList) then acc+1 else acc) 0 winners
+    prob:: Double
+    prob = (fromInteger (toInteger occurences))/(fromInteger (toInteger (n+extrarep)))
+  return prob
 
 main :: IO ()
 main = do
-  putStrLn (show $ computeProbability numberOfSimulations [1 .. numberOfSimulations] 21)
-
+   prob10 <- computeProbability numberOfSimulations 1000000 10
+   prob100 <- computeProbability numberOfSimulations 1000000 100
+   prob1000 <- computeProbability numberOfSimulations 1000000 1000
+   putStrLn $ "Probability for 10 more post " ++ (show prob10)
+   putStrLn $ "Probability for 100 more post " ++ (show prob100)
+   putStrLn $ "Probability for 1000 more post " ++ (show prob1000)
